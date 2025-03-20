@@ -10,6 +10,9 @@ require_relative "templates/resource"
 require_relative "templates/main"
 require_relative "templates/readme"
 require_relative "templates/cache"
+require_relative "templates/collection"
+require_relative "templates/object"
+require_relative "templates/documentation"
 
 module Wrappix
   class Builder
@@ -23,6 +26,7 @@ module Wrappix
       create_base_files
       create_resource_files
       create_readme
+      create_documentation
     end
 
     private
@@ -33,6 +37,8 @@ module Wrappix
       create_file("lib/#{@api_name}/request.rb", Templates::Request.render(@module_name, @config))
       create_file("lib/#{@api_name}/error.rb", Templates::Error.render(@module_name, @config))
       create_file("lib/#{@api_name}/cache.rb", Templates::Cache.render(@module_name, @config))
+      create_file("lib/#{@api_name}/object.rb", Templates::Object.render(@module_name, @config))
+      create_file("lib/#{@api_name}/collection.rb", Templates::Collection.render(@module_name, @config))
       update_main_file
     end
 
@@ -64,6 +70,10 @@ module Wrappix
 
     def create_readme
       create_file("README.md", Templates::Readme.render(@api_name, @module_name, @config))
+    end
+
+    def create_documentation
+      create_file("docs/api.md", Templates::Documentation.render(@api_name, @module_name, @config))
     end
   end
 end

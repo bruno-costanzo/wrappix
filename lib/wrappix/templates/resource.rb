@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Wrappix
   module Templates
     class Resource
@@ -7,12 +5,15 @@ module Wrappix
         endpoints = resource_config["endpoints"] || []
         methods = endpoints.map { |endpoint| endpoint_method(module_name, endpoint) }.join("\n\n")
 
+        # Para normalizar el nombre del recurso
+        class_name = resource_name.capitalize
+
         <<~RUBY
           # frozen_string_literal: true
 
           module #{module_name}
             module Resources
-              class #{resource_name.capitalize}
+              class #{class_name}
                 def initialize(client)
                   @client = client
                 end
@@ -28,52 +29,47 @@ module Wrappix
         name = endpoint["name"]
         method = endpoint["method"] || "get"
         path = endpoint["path"] || name
-        params = endpoint["params"] ? ", params: params" : ""
 
-        # Determinar si es una colección o un objeto individual
-        # Por convención, consideramos que métodos como "list", "search" devuelven colecciones
-        is_collection = endpoint["collection"] || ["list", "search", "index"].include?(name)
+        # Determinar si es una colección
+        is_collection = endpoint["collection"] || ["all", "list", "index", "search"].include?(name)
 
-        # Reemplazar placeholders en la ruta, como {id}
+        # Procesar parámetros del path
         has_params = path.include?("{")
+        param_list = has_params ? path.scan(/\{([^}]+)\}/).flatten : []
 
-        if has_params
-          # Para rutas como "users/{id}"
-          param_list = path.scan(/\{([^}]+)\}/).flatten
-          method_params = param_list.join(", ")
-          method_params += ", params = {}" if endpoint["params"]
+        # Preparar los parámetros del método
+        endpoint_params = []
+        endpoint_params.concat(param_list)
+        endpoint_params << "params = {}" if endpoint["params"]
+        endpoint_params << "body = {}" if ["post", "put", "patch"].include?(method)
 
-          path_with_params = path.gsub(/\{([^}]+)\}/) { |m| "\#{#{$1}}" }
+        # Preparar argumentos para el método request
+        request_args = []
+        request_args << "params: params" if endpoint["params"]
+        request_args << "body: body" if ["post", "put", "patch"].include?(method)
+        request_options = request_args.empty? ? "" : "(#{request_args.join(", ")})"
 
-          <<~RUBY.strip
-            def #{name}(#{method_params})
-              request = #{module_name}::Request.new("#{path_with_params}")
-              response = request.#{method}(#{params})
-
-              #{wrap_response_code(module_name, is_collection)}
-            end
-          RUBY
-        else
-          # Para rutas simples
-          method_params = endpoint["params"] ? "params = {}" : ""
-
-          <<~RUBY.strip
-            def #{name}(#{method_params})
-              request = #{module_name}::Request.new("#{path}")
-              response = request.#{method}(#{params})
-
-              #{wrap_response_code(module_name, is_collection)}
-            end
-          RUBY
+        # Generar path con reemplazos de variables
+        path_with_params = path
+        param_list.each do |param|
+          path_with_params = path_with_params.gsub(/\{#{param}\}/, "\#{#{param}}")
         end
-      end
 
-      def self.wrap_response_code(module_name, is_collection)
-        if is_collection
+        # Código para transformar la respuesta
+        response_transform = if is_collection
           "#{module_name}::Collection.from_response(response, type: #{module_name}::Object)"
         else
           "#{module_name}::Object.new(response)"
         end
+
+        <<~RUBY.strip
+          def #{name}(#{endpoint_params.join(", ")})
+            request = #{module_name}::Request.new("#{path_with_params}")
+            response = request.#{method}#{request_options}
+
+            #{response_transform}
+          end
+        RUBY
       end
     end
   end

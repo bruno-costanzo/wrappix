@@ -64,6 +64,14 @@ module Wrappix
           end
           ```
 
+          ## API Documentation
+          Detailed API documentation is available in the `docs/api.md` file, which includes:
+
+          - All available endpoints
+          - Required parameters
+          - Example requests and responses
+          - Authentication details
+
           ## Cache
 
           #{module_name} uses a caching solution to improve efficiency (e.g., for caching tokens). By default, it uses a simple memory cache,

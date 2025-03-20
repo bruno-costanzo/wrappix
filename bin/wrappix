@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require "wrappix"
+require "wrappix/cli"
+
+Wrappix::CLI.start(ARGV)
