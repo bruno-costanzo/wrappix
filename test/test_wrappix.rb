@@ -91,4 +91,32 @@ class TestWrappix < Minitest::Test
       end
     end
   end
+
+  def test_cache_implementation
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write("cache_api.yml", {
+          "api_name" => "cache-api",
+          "base_url" => "https://api.example.com",
+          "auth_type" => "oauth"
+        }.to_yaml)
+
+        Wrappix.build("cache_api.yml")
+
+        # Verificar que se creó el archivo de caché
+        assert File.exist?("lib/cache-api/cache.rb")
+
+        # Verificar que el módulo principal tiene configuración de caché
+        main_content = File.read("lib/cache-api.rb")
+        assert_match(/attr_accessor :configuration, :cache/, main_content)
+        assert_match(/self\.cache = MemoryCache\.new/, main_content)
+
+        # Verificar que el Request usa la caché para tokens OAuth
+        request_content = File.read("lib/cache-api/request.rb")
+        assert_match(/def get_access_token/, request_content)
+        assert_match(/token = CacheApi\.cache\.read\("access_token"\)/, request_content)
+        assert_match(/CacheApi\.cache\.write\("access_token", token\)/, request_content)
+      end
+    end
+  end
 end

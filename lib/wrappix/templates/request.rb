@@ -4,6 +4,39 @@ module Wrappix
   module Templates
     class Request
       def self.render(module_name, config)
+        oauth_token_logic = if config["auth_type"] == "oauth"
+          <<~RUBY
+            def get_access_token
+              # Try to get token from cache first
+              token = #{module_name}.cache.read("access_token")
+              return token if token
+
+              # If not in cache, fetch new token
+              response = Faraday.post(@config.token_url, {
+                client_id: @config.client_id,
+                client_secret: @config.client_secret,
+                grant_type: "client_credentials"
+              })
+
+              if response.status == 200
+                data = JSON.parse(response.body)
+                token = data["access_token"]
+                expires_in = data["expires_in"] || 3600
+
+                # Cache the token
+                #{module_name}.cache.write("access_token", token)
+
+                # Cache expiration handling could be improved
+                token
+              else
+                raise #{module_name}::Error.new("Failed to obtain access token", response.body, response.status)
+              end
+            end
+          RUBY
+        else
+          ""
+        end
+
         <<~RUBY
           # frozen_string_literal: true
 
@@ -72,6 +105,8 @@ module Wrappix
 
                 raise #{module_name}::Error.new(error_message, response.body, response.status)
               end
+
+              #{oauth_token_logic}
             end
           end
         RUBY
@@ -80,7 +115,7 @@ module Wrappix
       def self.connection_auth_config(config)
         case config["auth_type"]
         when "oauth"
-          "conn.request :authorization, 'Bearer', @config.access_token if @config.access_token"
+          "conn.request :authorization, 'Bearer', get_access_token if @config.client_id && @config.client_secret"
         when "basic"
           "conn.basic_auth(@config.username, @config.password) if @config.username && @config.password"
         when "api_key"

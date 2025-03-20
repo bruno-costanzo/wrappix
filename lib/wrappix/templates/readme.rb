@@ -63,6 +63,25 @@ module Wrappix
             puts "Details: \#{e.body}"
           end
           ```
+
+          ## Cache
+
+          #{module_name} uses a caching solution to improve efficiency (e.g., for caching tokens). By default, it uses a simple memory cache,
+          but you can change the cache method by setting the `#{module_name}.cache` attribute.
+
+          ```ruby
+          # Use Redis cache
+          #{module_name}.cache = Redis.new
+
+          # Or use Rails cache
+          #{module_name}.cache = Rails.cache
+
+          # Or use file-based cache
+          #{module_name}.cache = #{module_name}::FileCache.new
+
+          # Or any object that responds to read/write/delete/clear
+          #{module_name}.cache = YourCustomCache.new
+          ```
         MARKDOWN
       end
 

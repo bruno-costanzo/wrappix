@@ -9,6 +9,7 @@ require_relative "templates/error"
 require_relative "templates/resource"
 require_relative "templates/main"
 require_relative "templates/readme"
+require_relative "templates/cache"
 
 module Wrappix
   class Builder
@@ -31,6 +32,7 @@ module Wrappix
       create_file("lib/#{@api_name}/client.rb", Templates::Client.render(@module_name, @config))
       create_file("lib/#{@api_name}/request.rb", Templates::Request.render(@module_name, @config))
       create_file("lib/#{@api_name}/error.rb", Templates::Error.render(@module_name, @config))
+      create_file("lib/#{@api_name}/cache.rb", Templates::Cache.render(@module_name, @config))
       update_main_file
     end
 

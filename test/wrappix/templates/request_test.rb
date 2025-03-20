@@ -6,7 +6,10 @@ class RequestTemplateTest < Minitest::Test
     config = {"auth_type" => "oauth"}
     content = Wrappix::Templates::Request.render("TestApi", config)
 
-    assert_match(/conn\.request :authorization, 'Bearer', @config\.access_token/, content)
+    assert_match(/conn\.request :authorization, 'Bearer', get_access_token/, content)
+    assert_match(/def get_access_token/, content)
+    assert_match(/TestApi\.cache\.read\("access_token"\)/, content)
+    assert_match(/TestApi\.cache\.write\("access_token"/, content)
   end
 
   def test_basic_authentication

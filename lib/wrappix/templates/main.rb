@@ -15,13 +15,16 @@ module Wrappix
           require_relative "#{api_name}/error"
           require_relative "#{api_name}/request"
           require_relative "#{api_name}/client"
+          require_relative "#{api_name}/object"
+          require_relative "#{api_name}/collection"
+          require_relative "#{api_name}/cache"
 
-          # Recursos
+          # Resources
           #{resource_requires}
 
           module #{module_name}
             class << self
-              attr_accessor :configuration
+              attr_accessor :configuration, :cache
 
               def configure
                 self.configuration ||= Configuration.new
@@ -34,6 +37,8 @@ module Wrappix
               end
             end
 
+            # Default to memory cache
+            self.cache = MemoryCache.new
             self.configuration = Configuration.new
           end
         RUBY
