@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+require_relative "../wrappix"
 require "thor"
 
 module Wrappix
@@ -9,8 +12,13 @@ module Wrappix
         exit(1)
       end
 
-      Wrappix.build(config_file)
-      say "Wrapper generado correctamente", :green
+      if Wrappix.build(config_file)
+        say "Wrapper generado correctamente", :green
+        true
+      else
+        say "Error al generar el wrapper", :red
+        false
+      end
     end
   end
 end

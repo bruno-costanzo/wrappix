@@ -19,7 +19,7 @@ module Wrappix
         RUBY
       end
 
-      def self.resource_methods(module_name, config)
+      def self.resource_methods(_module_name, config)
         resources = config["resources"] || {}
 
         resources.map do |name, _config|

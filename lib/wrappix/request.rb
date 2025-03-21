@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Wrappix
   class Request
     def initialize(url, config = Wrappix.configuration)

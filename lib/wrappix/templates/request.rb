@@ -5,37 +5,37 @@ module Wrappix
     class Request
       def self.render(module_name, config)
         oauth_token_logic = if config["auth_type"] == "oauth"
-          <<~RUBY
-            def get_access_token
-              # Try to get token from cache first
-              token = #{module_name}.cache.read("access_token")
-              return token if token
+                              <<~RUBY
+                                def get_access_token
+                                  # Try to get token from cache first
+                                  token = #{module_name}.cache.read("access_token")
+                                  return token if token
 
-              # If not in cache, fetch new token
-              response = Faraday.post(@config.token_url, {
-                client_id: @config.client_id,
-                client_secret: @config.client_secret,
-                grant_type: "client_credentials"
-              })
+                                  # If not in cache, fetch new token
+                                  response = Faraday.post(@config.token_url, {
+                                    client_id: @config.client_id,
+                                    client_secret: @config.client_secret,
+                                    grant_type: "client_credentials"
+                                  })
 
-              if response.status == 200
-                data = JSON.parse(response.body)
-                token = data["access_token"]
-                expires_in = data["expires_in"] || 3600
+                                  if response.status == 200
+                                    data = JSON.parse(response.body)
+                                    token = data["access_token"]
+                                    expires_in = data["expires_in"] || 3600
 
-                # Cache the token
-                #{module_name}.cache.write("access_token", token)
+                                    # Cache the token
+                                    #{module_name}.cache.write("access_token", token)
 
-                # Cache expiration handling could be improved
-                token
-              else
-                raise #{module_name}::Error.new("Failed to obtain access token", response.body, response.status)
-              end
-            end
-          RUBY
-        else
-          ""
-        end
+                                    # Cache expiration handling could be improved
+                                    token
+                                  else
+                                    raise #{module_name}::Error.new("Failed to obtain access token", response.body, response.status)
+                                  end
+                                end
+                              RUBY
+                            else
+                              ""
+                            end
 
         <<~RUBY
           # frozen_string_literal: true

@@ -17,7 +17,11 @@ module Wrappix
     end
 
     def build(config_file)
-      Builder.new(config_file).build
+      builder = Builder.new(config_file)
+      builder.build
+    rescue Errno::ENOENT => e
+      puts "Error: #{e.message}"
+      false
     end
   end
 

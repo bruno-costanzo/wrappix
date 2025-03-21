@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 require "wrappix/templates/resource"
 
@@ -6,11 +8,11 @@ class ResourceTemplateTest < Minitest::Test
     # Probar diferentes métodos HTTP
     resource_config = {
       "endpoints" => [
-        {"name" => "list", "method" => "get", "path" => "items"},
-        {"name" => "create", "method" => "post", "path" => "items"},
-        {"name" => "update", "method" => "put", "path" => "items/{id}"},
-        {"name" => "partial_update", "method" => "patch", "path" => "items/{id}"},
-        {"name" => "remove", "method" => "delete", "path" => "items/{id}"}
+        { "name" => "list", "method" => "get", "path" => "items" },
+        { "name" => "create", "method" => "post", "path" => "items" },
+        { "name" => "update", "method" => "put", "path" => "items/{id}" },
+        { "name" => "partial_update", "method" => "patch", "path" => "items/{id}" },
+        { "name" => "remove", "method" => "delete", "path" => "items/{id}" }
       ]
     }
 
@@ -36,8 +38,8 @@ class ResourceTemplateTest < Minitest::Test
   def test_handles_params_parameter
     resource_config = {
       "endpoints" => [
-        {"name" => "search", "method" => "get", "path" => "search", "params" => true},
-        {"name" => "filter", "method" => "get", "path" => "filter/{type}", "params" => true}
+        { "name" => "search", "method" => "get", "path" => "search", "params" => true },
+        { "name" => "filter", "method" => "get", "path" => "filter/{type}", "params" => true }
       ]
     }
 
@@ -53,7 +55,7 @@ class ResourceTemplateTest < Minitest::Test
     # Configuración para un endpoint que devuelve un objeto individual
     single_config = {
       "endpoints" => [
-        {"name" => "get", "method" => "get", "path" => "items/{id}"}
+        { "name" => "get", "method" => "get", "path" => "items/{id}" }
       ]
     }
 
@@ -66,7 +68,7 @@ class ResourceTemplateTest < Minitest::Test
     # Configuración para un endpoint que devuelve una colección
     collection_config = {
       "endpoints" => [
-        {"name" => "list", "method" => "get", "path" => "items"}
+        { "name" => "list", "method" => "get", "path" => "items" }
       ]
     }
 
@@ -79,7 +81,7 @@ class ResourceTemplateTest < Minitest::Test
     # Configuración con flag collection explícito
     explicit_config = {
       "endpoints" => [
-        {"name" => "search", "method" => "get", "path" => "items/search", "collection": true}
+        { "name" => "search", "method" => "get", "path" => "items/search", "collection": true }
       ]
     }
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 require "wrappix/templates/cache"
 
@@ -14,7 +16,7 @@ class CacheTemplateTest < Minitest::Test
 
     # Verificar clase FileCache
     assert_match(/class FileCache/, content)
-    assert_match(/require "yaml\/store"/, content)
+    assert_match(%r{require "yaml/store"}, content)
     assert_match(/@store = YAML::Store\.new\(path\)/, content)
   end
 end

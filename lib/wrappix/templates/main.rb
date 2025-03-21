@@ -4,10 +4,10 @@ module Wrappix
   module Templates
     class Main
       def self.render(api_name, module_name, config)
+        # api_name ya debería estar normalizado aquí
         resources = config["resources"] || {}
         resource_requires = resources.keys.map do |r|
-          singular = r.end_with?('s') ? r.chop : r
-          "require_relative \"#{api_name}/#{singular}\"\nrequire_relative \"#{api_name}/#{singular}_resource\""
+          "require_relative \"#{api_name}/resources/#{r}\""
         end.join("\n")
 
         <<~RUBY
@@ -19,6 +19,7 @@ module Wrappix
           require_relative "#{api_name}/request"
           require_relative "#{api_name}/object"
           require_relative "#{api_name}/collection"
+          require_relative "#{api_name}/client"
           require_relative "#{api_name}/cache"
 
           # Resources
@@ -26,12 +27,17 @@ module Wrappix
 
           module #{module_name}
             class << self
-              attr_accessor :configuration, :cache, :customer_id
+              attr_accessor :configuration, :cache
 
               def configure
                 self.configuration ||= Configuration.new
                 yield(configuration) if block_given?
                 self
+              end
+
+              # Método para acceder al cliente
+              def client
+                @client ||= Client.new(configuration)
               end
             end
 

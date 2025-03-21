@@ -11,11 +11,11 @@ module Wrappix
         <<~MARKDOWN
           # #{module_name} API Client
 
-          A Ruby API wrapper for #{api_name}.
+          A Ruby API wrapper for the #{api_name} API.
 
           ## Installation
 
-          Add this line to your Gemfile:
+          Add this line to your application's Gemfile:
 
           ```ruby
           gem '#{api_name}'
@@ -23,11 +23,15 @@ module Wrappix
 
           And then execute:
 
-              $ bundle install
+          ```bash
+          $ bundle install
+          ```
 
           Or install it yourself as:
 
-              $ gem install #{api_name}
+          ```bash
+          $ gem install #{api_name}
+          ```
 
           ## Configuration
 
@@ -40,15 +44,47 @@ module Wrappix
 
           ## Usage
 
+          ### Initializing the client
+
           ```ruby
           # Initialize the client
           client = #{module_name}.client
+          ```
 
-          # Use the available resources
+          ### Examples
+
+          ```ruby
           #{usage_examples(module_name, config)}
           ```
 
-          ## Available Resources and Endpoints
+          ### Working with responses
+
+          Objects returned by the API can be accessed using dot notation:
+
+          ```ruby
+          user = client.users.get(123)
+          puts user.id          # => 123
+          puts user.name        # => "John Doe"
+          puts user.email       # => "john@example.com"
+          ```
+
+          Collections include pagination support:
+
+          ```ruby
+          users = client.users.list
+
+          # Iterate through items
+          users.data.each do |user|
+            puts user.name
+          end
+
+          # Check pagination info
+          if users.next_href
+            # More results available
+          end
+          ```
+
+          ## Resources and Endpoints
 
           #{resource_docs}
 
@@ -65,6 +101,7 @@ module Wrappix
           ```
 
           ## API Documentation
+
           Detailed API documentation is available in the `docs/api.md` file, which includes:
 
           - All available endpoints
@@ -72,7 +109,9 @@ module Wrappix
           - Example requests and responses
           - Authentication details
 
-          ## Cache
+          ## Advanced Usage
+
+          ### Caching
 
           #{module_name} uses a caching solution to improve efficiency (e.g., for caching tokens). By default, it uses a simple memory cache,
           but you can change the cache method by setting the `#{module_name}.cache` attribute.
@@ -90,10 +129,19 @@ module Wrappix
           # Or any object that responds to read/write/delete/clear
           #{module_name}.cache = YourCustomCache.new
           ```
+
+          ### Custom Headers
+
+          You can set custom headers for all requests:
+
+          ```ruby
+          #{module_name}.configure do |config|
+            config.headers["User-Agent"] = "MyApp/1.0"
+            config.headers["X-Custom-Header"] = "Value"
+          end
+          ```
         MARKDOWN
       end
-
-      private
 
       def self.auth_setup_instructions(config)
         case config["auth_type"]
@@ -118,7 +166,7 @@ module Wrappix
         end
       end
 
-      def self.usage_examples(module_name, config)
+      def self.usage_examples(_module_name, config)
         resources = config["resources"] || {}
         examples = []
 
@@ -134,18 +182,18 @@ module Wrappix
           if has_params
             # Extract parameters
             params = endpoint["path"].scan(/\{([^}]+)\}/).flatten
-            param_values = params.map { |p| "123" } # Example values
+            param_values = params.map { |_p| "123" } # Example values
             args = param_values.join(", ")
 
             examples << "# #{resource_name.capitalize} - #{endpoint["name"]} example"
             examples << "response = client.#{resource_name}.#{endpoint["name"]}(#{args})"
           else
             examples << "# #{resource_name.capitalize} - #{endpoint["name"]} example"
-            if method == "post" || method == "put" || method == "patch"
-              examples << "response = client.#{resource_name}.#{endpoint["name"]}({name: 'value', other_field: 'value'})"
-            else
-              examples << "response = client.#{resource_name}.#{endpoint["name"]}"
-            end
+            examples << if %w[post put patch].include?(method)
+                          "response = client.#{resource_name}.#{endpoint["name"]}({name: 'value', other_field: 'value'})"
+                        else
+                          "response = client.#{resource_name}.#{endpoint["name"]}"
+                        end
           end
 
           examples << ""
@@ -154,7 +202,7 @@ module Wrappix
         examples.join("\n")
       end
 
-      def self.generate_resource_docs(module_name, config)
+      def self.generate_resource_docs(_module_name, config)
         resources = config["resources"] || {}
         docs = []
 
@@ -177,9 +225,7 @@ module Wrappix
               docs << "- Path Parameters: #{params.map { |p| "`#{p}`" }.join(", ")}"
             end
 
-            if endpoint["params"]
-              docs << "- Accepts additional query parameters"
-            end
+            docs << "- Accepts additional query parameters" if endpoint["params"]
 
             # Usage example
             docs << "\n```ruby"
@@ -187,19 +233,19 @@ module Wrappix
               params = path.scan(/\{([^}]+)\}/).flatten
               param_args = params.map { |p| "#{p}: 123" }.join(", ")
 
-              if endpoint["params"]
-                docs << "client.#{resource_name}.#{name}(#{param_args}, {param1: 'value', param2: 'value'})"
-              else
-                docs << "client.#{resource_name}.#{name}(#{param_args})"
-              end
+              docs << if endpoint["params"]
+                        "client.#{resource_name}.#{name}(#{param_args}, {param1: 'value', param2: 'value'})"
+                      else
+                        "client.#{resource_name}.#{name}(#{param_args})"
+                      end
             else
-              if method == "post" || method == "put" || method == "patch"
-                docs << "client.#{resource_name}.#{name}({field1: 'value', field2: 'value'})"
-              elsif endpoint["params"]
-                docs << "client.#{resource_name}.#{name}({param1: 'value', param2: 'value'})"
-              else
-                docs << "client.#{resource_name}.#{name}"
-              end
+              docs << if %w[post put patch].include?(method)
+                        "client.#{resource_name}.#{name}({field1: 'value', field2: 'value'})"
+                      elsif endpoint["params"]
+                        "client.#{resource_name}.#{name}({param1: 'value', param2: 'value'})"
+                      else
+                        "client.#{resource_name}.#{name}"
+                      end
             end
             docs << "```\n"
           end
