@@ -99,13 +99,10 @@ module Wrappix
         method = endpoint["method"]&.upcase || "GET"
         path = endpoint["path"] || name
 
-        # Extraer los parámetros del path
         path_params = path.scan(/\{([^}]+)\}/).flatten
 
-        # Generar la URL completa para la documentación
         full_url = "#{base_url.chomp("/")}/#{path}"
 
-        # Generar la llamada al método para la documentación
         method_params = []
         method_params.concat(path_params)
         method_params << "params" if endpoint["params"]
@@ -113,7 +110,6 @@ module Wrappix
 
         client_call = "client.#{resource_name}.#{name}(#{method_params.join(", ")})"
 
-        # Documentación del endpoint
         doc = <<~MARKDOWN
 
           ### #{name}

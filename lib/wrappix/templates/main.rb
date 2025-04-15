@@ -4,7 +4,6 @@ module Wrappix
   module Templates
     class Main
       def self.render(api_name, module_name, config)
-        # api_name ya debería estar normalizado aquí
         resources = config["resources"] || {}
         resource_requires = resources.keys.map do |r|
           "require_relative \"#{api_name}/resources/#{r}\""
@@ -21,8 +20,6 @@ module Wrappix
           require_relative "#{api_name}/collection"
           require_relative "#{api_name}/client"
           require_relative "#{api_name}/cache"
-
-          # Resources
           #{resource_requires}
 
           module #{module_name}
@@ -35,13 +32,11 @@ module Wrappix
                 self
               end
 
-              # Método para acceder al cliente
               def client
                 @client ||= Client.new(configuration)
               end
             end
 
-            # Default to memory cache
             self.cache = MemoryCache.new
             self.configuration = Configuration.new
           end

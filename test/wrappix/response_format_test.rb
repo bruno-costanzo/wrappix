@@ -9,7 +9,6 @@ class ResponseFormatTest < Minitest::Test
   def test_handles_custom_response_format
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
-        # Configuración con formato de respuesta personalizado
         File.write("format_config.yml", {
           "api_name" => "format-api",
           "base_url" => "https://api.example.com",
@@ -34,16 +33,12 @@ class ResponseFormatTest < Minitest::Test
 
         Wrappix.build("format_config.yml")
 
-        # Verificar que se crearon los recursos
         assert File.exist?("lib/format_api/resources/products.rb")
 
-        # Verificar el contenido
         products_content = File.read("lib/format_api/resources/products.rb")
 
-        # La colección debe usar el formato personalizado
         assert_match(/FormatApi::Collection\.from_response\(response, type: FormatApi::Object\)/, products_content)
 
-        # El objeto individual también debería respetar el formato
         assert_match(/FormatApi::Object\.new\(response/, products_content)
       end
     end
@@ -52,7 +47,6 @@ class ResponseFormatTest < Minitest::Test
   def test_resource_specific_response_format
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
-        # Configuración con formatos de respuesta por recurso
         File.write("specific_config.yml", {
           "api_name" => "specific-api",
           "base_url" => "https://api.example.com",
@@ -85,15 +79,12 @@ class ResponseFormatTest < Minitest::Test
 
         Wrappix.build("specific_config.yml")
 
-        # Verificar que se crearon los recursos
         assert File.exist?("lib/specific_api/resources/users.rb")
         assert File.exist?("lib/specific_api/resources/products.rb")
 
-        # El contenido debe reflejar los formatos específicos
         users_content = File.read("lib/specific_api/resources/users.rb")
         products_content = File.read("lib/specific_api/resources/products.rb")
 
-        # Comprobar que cada recurso usa sus propios formatos
         assert_match(/SpecificApi::Collection\.from_response\(response, type: SpecificApi::Object\)/, users_content)
         assert_match(/SpecificApi::Collection\.from_response\(response, type: SpecificApi::Object\)/, products_content)
       end

@@ -23,10 +23,8 @@ class DocumentationTest < Minitest::Test
 
         Wrappix.build("doc_config.yml")
 
-        # Verificar que se creó el archivo de documentación
         assert File.exist?("docs/api.md"), "Archivo de documentación API no creado"
 
-        # Verificar contenido básico
         doc_content = File.read("docs/api.md")
         assert_match(/# DocApi API Documentation/, doc_content)
         assert_match(/## Resources/, doc_content)

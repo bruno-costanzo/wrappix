@@ -9,7 +9,6 @@ class DynamicMethodsTest < Minitest::Test
   def test_generates_dynamic_resource_methods
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
-        # Configuración con múltiples recursos
         File.write("dynamic_config.yml", {
           "api_name" => "dynamic-api",
           "base_url" => "https://api.example.com",
@@ -32,32 +31,25 @@ class DynamicMethodsTest < Minitest::Test
           }
         }.to_yaml)
 
-        # Generar la API
         Wrappix.build("dynamic_config.yml")
 
-        # Cargar el código generado
         $LOAD_PATH.unshift "#{dir}/lib"
         require "dynamic_api"
 
-        # Configurar el cliente
         DynamicApi.configure do |config|
           config.base_url = "https://api.example.com"
         end
 
-        # Obtener una instancia del cliente
         client = DynamicApi.client
 
-        # Verificar que los métodos de recurso se generaron correctamente
         assert_respond_to client, :users
         assert_respond_to client, :products
         assert_respond_to client, :orders
 
-        # Verificar que los métodos devuelven instancias de recursos
         assert_instance_of DynamicApi::Resources::Users, client.users
         assert_instance_of DynamicApi::Resources::Products, client.products
         assert_instance_of DynamicApi::Resources::Orders, client.orders
 
-        # Verificar que los recursos tienen los métodos esperados
         assert_respond_to client.users, :list
         assert_respond_to client.products, :list
         assert_respond_to client.orders, :list

@@ -18,7 +18,6 @@ class ErrorHandlingTest < Minitest::Test
   def test_handles_http_errors
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
-        # Configuración básica
         File.write("error_config.yml", {
           "api_name" => "error-api",
           "base_url" => "https://api.example.com",
@@ -31,19 +30,14 @@ class ErrorHandlingTest < Minitest::Test
           }
         }.to_yaml)
 
-        # Generar la API
         Wrappix.build("error_config.yml")
 
-        # Cargar el código generado
         $LOAD_PATH.unshift "#{dir}/lib"
         require "error_api"
 
-        # Configurar el cliente
         ErrorApi.configure do |config|
           config.base_url = "https://api.example.com"
         end
-
-        # Mockear diferentes respuestas de error - permitir cualquier header
 
         # 1. Error 404
         stub_request(:get, "https://api.example.com/users/999")
@@ -69,24 +63,20 @@ class ErrorHandlingTest < Minitest::Test
             body: { error: "Internal server error" }.to_json
           )
 
-        # Probar el cliente
         client = ErrorApi.client
 
-        # Probar error 404
         error = assert_raises(ErrorApi::Error) do
           client.users.get(999)
         end
         assert_equal 404, error.status
         assert_match(/User not found/, error.message)
 
-        # Probar error 401
         error = assert_raises(ErrorApi::Error) do
           client.users.get("unauthorized")
         end
         assert_equal 401, error.status
         assert_match(/Unauthorized access/, error.message)
 
-        # Probar error 500
         error = assert_raises(ErrorApi::Error) do
           client.users.get("server-error")
         end
