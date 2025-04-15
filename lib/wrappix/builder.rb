@@ -190,7 +190,6 @@ module Wrappix
       end
 
       @file_paths[path] = true
-      puts "File created: #{path}"
 
       true
     end

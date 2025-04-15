@@ -87,8 +87,8 @@ module Wrappix
 
               def connection
                 @connection ||= Faraday.new(url: @base_url) do |conn|
-                  #{connection_auth_config(config)}
                   conn.headers = @config.headers
+                  #{connection_auth_config(config)}
                   conn.response :json, content_type: /\\bjson$/
                   conn.adapter Faraday.default_adapter
                 end

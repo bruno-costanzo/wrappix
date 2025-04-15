@@ -1,4 +1,3 @@
-# test/wrappix/compatibility_test.rb
 # frozen_string_literal: true
 
 require "test_helper"
@@ -16,11 +15,9 @@ class CompatibilityTest < Minitest::Test
 
         Wrappix.build("compat_config.yml")
 
-        # Verificar que existen ambos archivos
         assert File.exist?("lib/compat_api.rb"), "Archivo normalizado no creado"
         assert File.exist?("lib/compat-api.rb"), "Archivo de compatibilidad no creado"
 
-        # Verificar que el archivo de compatibilidad requiere al normalizado
         compat_content = File.read("lib/compat-api.rb")
         assert_match(/require_relative "compat_api"/, compat_content)
       end
@@ -37,7 +34,6 @@ class CompatibilityTest < Minitest::Test
 
         Wrappix.build("dual_config.yml")
 
-        # Crear un script que use cada formato
         File.write("test_normalized.rb", <<~RUBY)
           $LOAD_PATH.unshift "#{dir}/lib"
           require "dual_api"
@@ -50,11 +46,9 @@ class CompatibilityTest < Minitest::Test
           puts "Loaded with original name: OK"
         RUBY
 
-        # Ejecutar ambos scripts
         normalized_output = `ruby test_normalized.rb`
         original_output = `ruby test_original.rb`
 
-        # Verificar que ambos funcionan
         assert_match(/Loaded with normalized name: OK/, normalized_output)
         assert_match(/Loaded with original name: OK/, original_output)
       end

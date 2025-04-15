@@ -16,11 +16,8 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_full_api_client_usage
-    skip "Este test necesita una integración más detallada con la estructura real de objetos"
-
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
-        # Configuración completa de API
         File.write("integration_config.yml", {
           "api_name" => "integration-api",
           "base_url" => "https://api.example.com",
@@ -37,20 +34,16 @@ class IntegrationTest < Minitest::Test
           }
         }.to_yaml)
 
-        # Generar la API
         Wrappix.build("integration_config.yml")
 
-        # Cargar el código generado
         $LOAD_PATH.unshift "#{dir}/lib"
         require "integration_api"
 
-        # Configurar el cliente
         IntegrationApi.configure do |config|
           config.base_url = "https://api.example.com"
           config.api_key = "test_api_key"
         end
 
-        # Mockear solicitudes HTTP
         stub_request(:any, /api\.example\.com/)
           .to_return(
             status: 200,
@@ -63,7 +56,6 @@ class IntegrationTest < Minitest::Test
             }.to_json
           )
 
-        # Prueba simplificada - solo verificar que podemos crear un cliente
         client = IntegrationApi.client
         assert_respond_to client, :users
         assert_respond_to client.users, :list

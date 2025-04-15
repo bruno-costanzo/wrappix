@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.authors = ["Bruno Costanzo"]
   spec.email = ["dev.bcostanzo@gmail.com"]
 
-  spec.summary = "TODO: Write a short summary, because RubyGems requires one."
-  spec.description = "TODO: Write a longer description or delete this line."
-  spec.homepage = "TODO: Put your gem's website or public repo URL here."
+  spec.summary = "Wrappix is a tool to create API Wrappers fast and easily"
+  spec.description = "Create API Wrappers fast and easily. Wrappix provides a simple and intuitive way to create API Wrappers."
+  spec.homepage = "https://github.com/bruno-costanzo/wrappix"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.1.0"
 
